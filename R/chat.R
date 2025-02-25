@@ -342,6 +342,8 @@ Chat <- R6::R6Class("Chat",
         cat_line(format(user_turn), prefix = "> ")
       }
 
+      time_start <- Sys.time()
+
       response <- chat_perform(
         provider = private$provider,
         mode = if (stream) "stream" else "value",
@@ -390,6 +392,12 @@ Chat <- R6::R6Class("Chat",
           cat_line(format(turn), prefix = "< ")
         }
       }
+
+      time_completed <- Sys.time()
+
+      attr(user_turn, "time_completed") <- time_start
+      attr(turn, "time_completed") <- time_completed
+
       private$add_turn(user_turn)
       private$add_turn(turn)
 
