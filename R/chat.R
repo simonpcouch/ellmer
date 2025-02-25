@@ -393,10 +393,10 @@ Chat <- R6::R6Class("Chat",
         }
       }
 
-      time_elapsed <- Sys.time()
+      time_completed <- Sys.time()
 
       attr(user_turn, "time_completed") <- time_start
-      attr(turn, "time_completed") <- time_elapsed
+      attr(turn, "time_completed") <- time_completed
 
       private$add_turn(user_turn)
       private$add_turn(turn)
