@@ -306,11 +306,33 @@ method(as_json, list(ProviderOpenAI, Turn)) <- function(provider, x) {
     }
 
     tools <- lapply(x@contents[is_tool], function(tool) {
-      list(
-        role = "tool",
-        content = tool_string(tool),
-        tool_call_id = tool@request@id
-      )
+      value <- tool@value
+      if (
+        length(value) > 0 && is.list(value[[1]]) && has_name(value[[1]], "type")
+      ) {
+        # Images in tool call results use the same entry point as
+        # chat inputs (#772)
+        content <- lapply(value, function(b) {
+          if (b$type == "image" && b$source$type == "base64") {
+            list(
+              type = "image_url",
+              image_url = list(
+                url = paste0(
+                  "data:",
+                  b$source$media_type,
+                  ";base64,",
+                  b$source$data
+                )
+              )
+            )
+          } else if (b$type == "text") {
+            list(type = "text", text = b$text)
+          }
+        })
+      } else {
+        content <- tool_string(tool)
+      }
+      list(role = "tool", content = content, tool_call_id = tool@request@id)
     })
 
     c(user, tools)
